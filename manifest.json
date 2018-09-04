@@ -1,20 +1,43 @@
+//this document defines the scripts
+
 {
-   "browser_action": {
-      "default_icon": "icon.png"
-   },
-   "content_scripts": [ {
-      "js": [ "js/loader.js" ],
-      "matches": [ "*://rave.office.net/*" ],
-      "run_at": "document_start"
-   }, {
-      "js": [ "js/loadercmat.js" ],
-      "matches": [ "*://cmat.tools.cp.microsoft.com/*" ],
-      "run_at": "document_start"
-   } ],
-   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA17C1P2I9ZUAdQikFdMmM7mgB+cVqjqnK1RWnJS9jeK+9xuA5Ut8mT7pAVqnrLgEfvMcfAoqwrvXdFIFTrJUjukfcyUU1hVnWNPrmBMYLfJI0i3EYJMpaPTvaFQPbzJmgOrTqaT4wTxt4LYAFWOyrK0eW5IzC3uknmeBI/TYuJCXfx1OxAPku/8Xo0lM9F/oHwJc/VA/4tMIUH0+gE9c6vs2k1bS4T1Wc6FAQm8evaaombhQhmusRAbtRGGcGjO5fRXZAaLA5ur4PHyaJYyG8PTjBSUnJClUdR7GdEX7nal7pel491lLG0RO6OWZXsYj1a3z9JGCLon/JI//yA6OYGwIDAQAB",
-   "manifest_version": 2,
-   "name": "TicketScout",
-   "permissions": [ "tabs", "\u003Call_urls>" ],
-   "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "1.7"
+    "browser_action": {
+        "default_icon": "icon.png"
+    },
+
+    // content scripts define which javascript files to run depening on matched site
+
+    // Google Match patterns can be found at the following link
+
+    // https://developer.chrome.com/extensions/match_patterns
+    "content_scripts": [
+        {
+            "js": [
+                "js/loader.js"
+            ],
+            "matches": [
+                "*://rave.office.net/*"
+            ],
+            "run_at": "document_start"
+        },
+        {
+            "js": [
+                "js/loadercmat.js"
+            ],
+            "matches": [
+                "*://cmat.tools.cp.microsoft.com/*"
+            ],
+            "run_at": "document_start"
+        }
+    ],
+    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA17C1P2I9ZUAdQikFdMmM7mgB+cVqjqnK1RWnJS9jeK+9xuA5Ut8mT7pAVqnrLgEfvMcfAoqwrvXdFIFTrJUjukfcyUU1hVnWNPrmBMYLfJI0i3EYJMpaPTvaFQPbzJmgOrTqaT4wTxt4LYAFWOyrK0eW5IzC3uknmeBI/TYuJCXfx1OxAPku/8Xo0lM9F/oHwJc/VA/4tMIUH0+gE9c6vs2k1bS4T1Wc6FAQm8evaaombhQhmusRAbtRGGcGjO5fRXZAaLA5ur4PHyaJYyG8PTjBSUnJClUdR7GdEX7nal7pel491lLG0RO6OWZXsYj1a3z9JGCLon/JI//yA6OYGwIDAQAB",
+    "manifest_version": 2,
+    "name": "TicketScout",
+    //    \u003C is < 
+    "permissions": [
+        "tabs",
+        "\u003Call_urls>"
+    ],
+    "update_url": "https://clients2.google.com/service/update2/crx",
+    "version": "1.7"
 }

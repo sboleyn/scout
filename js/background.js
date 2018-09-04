@@ -1,80 +1,95 @@
+// Uses chrome runtime api and fetch api which is similar to ajax but won't send/receive cookies by default and promise will not reject on http
 var content_port = null;
 var options_port = null;
 var popup_port = null;
 
-var handle_content = (message) =>
-{
-	if(message.type == 'agents'){
-		let agents = [];
-		for(let agent of message.data){
-			try {
-				agents.push(amap(agent));
-			}
-			catch {
+// message by type either agents ticktes or popup
+var handle_content = (message) => {
+    if (message.type == 'agents') {
+        let agents = [];
+        for (let agent of message.data) {
+            try {
+                // agent is an object
+                agents.push(amap(agent));
+            }
+            catch {
                 console.log('agent fail');
-				console.log(agent);
-			}
-		}
-		fetch('https://rvz.io/agents',{
-			method: 'POST',
-			body: JSON.stringify(agents)
-		}).then(res => res.json()).then(res => console.log(res));
-	}
-	else
-	if(message.type == 'tickets'){
-		let tickets = [];
-		for(let ticket of message.data){
-			try {
-				tickets.push(tmap(ticket));
-			}
-			catch {
-				console.log(ticket);
-			}
-		}
-		fetch('https://rvz.io/tickets',{
-			method: 'POST',
-			body: JSON.stringify(tickets)
-		}).then(res => res.json()).then(res => console.log(res));
+                console.log(agent);
+            }
+        }
+        fetch('https://rvz.io/agents', {
+            method: 'POST',
+            body: JSON.stringify(agents)
+            // A promise that resolves with the result of parsing the body text as JSON. This could be anything that can be represented by JSON — an object, an array, a string, a number...
+        }).then(res => res.json()).then(res => console.log(res));
     }
     else
-    if(message.type == 'popup'){
-        popup_port.postMessage(message);
-    }
+        if (message.type == 'tickets') {
+            let tickets = [];
+            // ticket is an object
+            for (let ticket of message.data) {
+                try {
+                    tickets.push(tmap(ticket));
+                }
+                catch {
+                    console.log(ticket);
+                }
+            }
+            fetch('https://rvz.io/tickets', {
+                method: 'POST',
+                body: JSON.stringify(tickets)
+            }).then(res => res.json()).then(res => console.log(res));
+        }
+        else
+            if (message.type == 'popup') {
+                // Send a message to the other end of the port. If the port is disconnected, an error is thrown. Message here is the parameter The message to send. This object should be JSON-ifiable.
+                popup_port.postMessage(message);
+            }
 }
 
-var handle_options = message =>
-{
-	console.log(`Received from options page: ${JSON.stringify(message)}`);
-	content_port.postMessage(message);
-}
-
-function handle_popup(message){
+var handle_options = message => {
+    console.log(`Received from options page: ${JSON.stringify(message)}`);
     content_port.postMessage(message);
 }
 
-var connection_made = port =>
-{
-	if(port.name == 'content')
-	{
-		content_port = port;
-		port.onMessage.addListener(handle_content);
-	}
-	if(port.name == 'options')
-	{
-		options_port = port;
-		port.onMessage.addListener(handle_options);
-    }
-    if(port.name == 'popup')
-    {
-        popup_port = port;
-        port.onMessage.addListener(handle_popup);
-    }
-	port.onDisconnect.addListener(port => { if(port.name == 'content') content_port = null; if(port.name == 'options') options_port = null; if(port.name == 'popup') popup_port = null;});
+function handle_popup(message) {
+    content_port.postMessage(message);
 }
 
+// callback for chromtime api onconnect
+var connection_made = port => {
+
+    // The name of the port, as specified in the call to runtime.connect.
+    if (port.name == 'content') {
+
+        content_port = port;
+
+        // This event is fired when postMessage is called by the other end of the port. The first parameter is the message, the second parameter is the port that received the message.
+        port.onMessage.addListener(handle_content);
+    }
+    if (port.name == 'options') {
+        options_port = port;
+        // This event is fired when postMessage is called by the other end of the port. The first parameter is the message, the second parameter is the port that received the message.
+        port.onMessage.addListener(handle_options);
+    }
+    if (port.name == 'popup') {
+        popup_port = port;
+
+        // This event is fired when postMessage is called by the other end of the port. The first parameter is the message, the second parameter is the port that received the message.
+        port.onMessage.addListener(handle_popup);
+    }
+
+    // Fired when the port is disconnected from the other end(s). runtime.lastError may be set if the port was disconnected by an error. If the port is closed via disconnect, then this event is only fired on the other end. This event is fired at most once (see also Port lifetime). The first and only parameter to the event handler is this disconnected port.
+    port.onDisconnect.addListener(port => { if (port.name == 'content') content_port = null; if (port.name == 'options') options_port = null; if (port.name == 'popup') popup_port = null; });
+}
+
+// Use the chrome.runtime API to retrieve the background page, return details about the manifest, and listen for and respond to events in the app or extension lifecycle. You can also use this API to convert the relative path of URLs to fully-qualified URLs. 
+
+//Fired when a connection is made from either an extension process or a content script (by runtime.connect).
 chrome.runtime.onConnect.addListener(connection_made);
 
 
+//creates an orgs object and returns information from values object 
 function tmap(values) {
     let orgs = {
         "5ae2d1bb-4d3a-441a-a649-9d3a6b0cbc08": "Default",
@@ -172,13 +187,14 @@ function tmap(values) {
         os: values.RequestData.ExtensionAttributes.OS,
         country_code: values.RequestData.ExtensionAttributes.TenantCountryCode,
         first_name: values.RequestData.UserFirstName,
-        last_name: values.RequestData.UserLastName,  
+        last_name: values.RequestData.UserLastName,
         description: values.RequestData.UserDescription,
         wait_time: values.RequestData.ExtensionAttributes.WaitTime,
         customer_contacts: values.RequestData.customerContacts
     }
 }
 
+// returns info from values object
 function amap(values) {
     return {
         partner_id: values.PartnerData.PartnerId,

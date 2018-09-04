@@ -1,3 +1,4 @@
+// Is creating two boolean values and an array
 window.failure = false;
 window.partner_id = false;
 var backlog = [];
